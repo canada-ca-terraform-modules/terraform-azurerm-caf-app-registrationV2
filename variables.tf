@@ -26,7 +26,7 @@ variable "project" {
 }
 
 variable "app_registrations" {
-  description = "List of AAD App Registrations to create"
+  description = "AAD App Registration to create"
   type        = any
   default     = {}
 }
