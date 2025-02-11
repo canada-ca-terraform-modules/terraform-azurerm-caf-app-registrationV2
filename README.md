@@ -33,7 +33,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_app_registrations"></a> [app\_registrations](#input\_app\_registrations) | List of AAD App Registrations to create | `any` | `{}` | no |
+| <a name="input_app_registrations"></a> [app\_registrations](#input\_app\_registrations) | AAD App Registration to create | `any` | `{}` | no |
 | <a name="input_env"></a> [env](#input\_env) | (Required) 4 character string defining the environment name prefix for the VM | `string` | n/a | yes |
 | <a name="input_group"></a> [group](#input\_group) | (Required) Character string defining the group for the target subscription | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure location for the VM | `string` | `"canadacentral"` | no |
