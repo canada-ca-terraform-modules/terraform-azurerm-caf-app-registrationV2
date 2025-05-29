@@ -215,3 +215,49 @@ resource "azuread_service_principal" "aad_sp" {
     ignore_changes = [owners]
   }
 }
+
+data "azuread_application_published_app_ids" "well_known" {}  
+
+data "azuread_service_principal" "example2" {
+  for_each = try(var.app_registrations.azuread_application.delegated_permission, {})
+  client_id = data.azuread_application_published_app_ids.well_known.result[each.key]
+}
+
+locals {
+  test = flatten([for resource_access in try(var.app_registrations.azuread_application.required_resource_access, {}) : 
+                  [for resource in resource_access.resource_access : resource]])
+
+  resource_app_id = try(var.app_registrations.azuread_application.required_resource_access[0].resource_app_id, "")
+
+  test2 = {for api, val in try(var.app_registrations.azuread_application.delegated_permission, {}): api => {
+              permission = val.permission
+              resource_sp = data.azuread_service_principal.example2[api].object_id
+          }}
+}
+
+data "azuread_service_principal" "example" {
+  count = local.resource_app_id == "" ? 0 : 1
+  client_id = local.resource_app_id
+}
+
+resource "azuread_app_role_assignment" "assignment" {
+  for_each = { for role in local.test : role.id => role if role.grant_admin_consent == true }
+  app_role_id = each.value.id
+  principal_object_id = azuread_service_principal.aad_sp.object_id
+  resource_object_id = data.azuread_service_principal.example[0].object_id
+
+  depends_on = [ azuread_application.aad_app, azuread_service_principal.aad_sp ]
+}
+
+resource "azuread_service_principal_delegated_permission_grant" "test" {
+  # for_each = {for pg in local.test3 : "${pg.api}.${pg.permission}" => pg}
+  for_each = local.test2
+  service_principal_object_id = azuread_service_principal.aad_sp.object_id
+  resource_service_principal_object_id = each.value.resource_sp
+  claim_values = each.value.permission
+}
+
+
+output "test" {
+  value = local.test2
+}
