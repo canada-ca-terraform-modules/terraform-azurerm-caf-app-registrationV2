@@ -215,3 +215,31 @@ resource "azuread_service_principal" "aad_sp" {
     ignore_changes = [owners]
   }
 }
+
+data "azuread_application_published_app_ids" "well_known" {}  
+
+data "azuread_service_principal" "delegated_apps" {
+  for_each = try(var.app_registrations.azuread_application.delegated_permission, {})
+  client_id = data.azuread_application_published_app_ids.well_known.result[each.key]
+}
+
+data "azuread_service_principal" "service_principals" {
+  for_each = toset([for required_resource in try(var.app_registrations.azuread_application.required_resource_access, {}) : required_resource.resource_app_id])
+
+  client_id = each.value
+}
+
+resource "azuread_app_role_assignment" "assignment" {
+  for_each = local.app_perm
+  app_role_id = each.value.id
+  principal_object_id = azuread_service_principal.aad_sp.object_id
+  resource_object_id = each.value.resource_app_id
+  depends_on = [ azuread_application.aad_app, azuread_service_principal.aad_sp ]
+}
+
+resource "azuread_service_principal_delegated_permission_grant" "test" {
+  for_each = local.delegated_perm
+  service_principal_object_id = azuread_service_principal.aad_sp.object_id
+  resource_service_principal_object_id = each.value.resource_sp
+  claim_values = each.value.permission
+}

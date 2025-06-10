@@ -3,8 +3,7 @@ app_registrationsV2 = {
     description = "Test App Registration" # (Required) Description of the app registration
     # (Optional) List of User UPNs that will be the initial owners of the app registration. Only used on 1st deployment of App Reg du to life_cycle
     owners = [
-      "louis-eric.tremblay_ssc-spc.gc.ca#EXT#@ent.cloud-nuage.canada.ca",
-      "Bernard.Maltais_ssc-spc.gc.ca#EXT#@163Ent.onmicrosoft.com"
+      "SET OWNER HERE"
     ]
 
     # (Required)
@@ -140,6 +139,15 @@ app_registrationsV2 = {
       #     resource_app_id = "00000003-0000-0000-c000-000000000000" # (Required) The unique identifier for the resource that the application requires access to. This should be the Application ID of the target application.
       #   }
       # ]
+
+      # (Optional) A collection of delegated permission to assign to the app registration
+      # delegated_permission = {
+      #   "MicrosoftGraph" = {
+      #     permission = ["User.Read.All", "Group.ReadWrite.All"]
+      #     # permission = [ "Group.ReadWrite.All"]
+      #   }
+      # }
+
 
       # (Optional) Single Page Application (SPA) settings
       # single_page_application = [
