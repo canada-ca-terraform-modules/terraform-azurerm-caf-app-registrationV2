@@ -127,6 +127,7 @@ app_registrationsV2 = {
       # ]
 
       # (Optional) A collection of required_resource_access blocks as documented below.
+      # NOTE : type="Scope" means Delegated permissions, type="Role" means Application permissions
       # required_resource_access = [
       #   {
       #     # (Required)
@@ -162,10 +163,12 @@ app_registrationsV2 = {
       #     homepage_url  = "https://example.com/home"       # (Optional) App homepage URL.
       #     logout_url    = "https://example.com/logout"     # (Optional) Logout URL.
       #     redirect_uris = ["https://example.com/redirect"] # (Optional) List of redirect URIs.
-      #     implicit_grant = {                               # (Optional) Implicit grant settings.
-      #       access_token_issuance_enabled = false          # (Optional) Enable access token issuance.
-      #       id_token_issuance_enabled     = false          # (Optional) Enable ID token issuance.
-      #     }
+      #     implicit_grant = [                               # (Optional) Implicit grant settings.
+      #       {
+      #         access_token_issuance_enabled = false        # (Optional) Enable access token issuance.
+      #         id_token_issuance_enabled     = false        # (Optional) Enable ID token issuance.
+      #       }
+      #     ]
       #   }
       # ]
     }
