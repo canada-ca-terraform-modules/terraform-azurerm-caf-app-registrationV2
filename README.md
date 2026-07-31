@@ -20,7 +20,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 3.9.0 |
+| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3.0 |
 
 ## Modules
 
