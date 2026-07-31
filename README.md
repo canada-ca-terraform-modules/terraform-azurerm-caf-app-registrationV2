@@ -4,6 +4,10 @@
 
 [./ESLZ/app_registrationV2.tfvars](./ESLZ/app_registrationV2.tfvars)
 
+## Notes
+
+- `owners` on `azuread_application` and `azuread_service_principal` are set to `ignore_changes` in the resource `lifecycle` block. The value from `app_registrations.owners` is only applied on the initial create; subsequent changes to that input are intentionally not reconciled, to avoid flapping caused by Azure AD's automatic owner injection. Manage owner changes outside Terraform (or via a targeted `terraform apply -replace`) if reconciliation is required.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -16,7 +20,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3.0 |
+| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 3.9.0 |
 
 ## Modules
 

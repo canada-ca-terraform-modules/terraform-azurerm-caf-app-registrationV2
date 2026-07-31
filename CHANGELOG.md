@@ -4,7 +4,7 @@ All notable changes to this module will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.1.0] - 2026-07-31
 
 ### Changed
 
@@ -28,6 +28,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `providers.tf` with pinned `required_providers` (previously implicit/missing).
 - `tests/upgrade_compat.tftest.hcl` — state-chaining compatibility test (`apply` baseline, then `plan` against upgraded config) verifying no resource replacement is triggered by this upgrade.
 - `.tflint.hcl`, `.gitignore`, `.gitattributes` added/standardized.
+- README `Notes` section documenting the `owners` `ignore_changes` lifecycle behaviour on `azuread_application`/`azuread_service_principal`.
+- `tests/app_registration.tftest.hcl` — `app_role_assignment_created_on_admin_consent` run exercising the `grant_admin_consent` → `azuread_app_role_assignment` path (previously untested).
+
+### Changed (PR review follow-up)
+
+- `data.azuread_service_principal.service_principals` `for_each` now only resolves resource app IDs that have at least one `resource_access` entry with `grant_admin_consent = true`, instead of every entry in `required_resource_access` — avoids unnecessary API calls and reduces the SP-read permission surface needed by the caller's credentials.
+- Clarified the `upgrade_plan_no_replacement` test comment in `tests/upgrade_compat.tftest.hcl`: the Terraform 1.x `test` framework's `assert` blocks can only verify planned attribute values, not planned resource actions (create/update/replace), so the run proves stable attributes rather than a guaranteed no-replace plan.
 
 ### Known blockers
 

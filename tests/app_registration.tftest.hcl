@@ -193,3 +193,76 @@ run "delegated_permission_single_user" {
     error_message = "user_object_id override must be passed through to the grant"
   }
 }
+
+run "app_role_assignment_created_on_admin_consent" {
+  command = plan
+
+  override_data {
+    target = data.azuread_service_principal.service_principals["00000003-0000-0000-c000-000000000000"]
+    values = {
+      object_id = "55555555-5555-5555-5555-555555555555"
+    }
+  }
+
+  variables {
+    app_registrations = {
+      description = "App Registration with admin-consented API permission"
+      azuread_application = {
+        required_resource_access = [
+          {
+            resource_app_id = "00000003-0000-0000-c000-000000000000"
+            resource_access = [
+              {
+                id                  = "df021288-bdef-4463-88db-98f22de89214"
+                type                = "Role"
+                grant_admin_consent = true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  assert {
+    condition     = length(azuread_app_role_assignment.assignment) == 1
+    error_message = "azuread_app_role_assignment must be created when grant_admin_consent = true"
+  }
+  assert {
+    condition     = azuread_app_role_assignment.assignment["55555555-5555-5555-5555-555555555555.df021288-bdef-4463-88db-98f22de89214"].resource_object_id == "55555555-5555-5555-5555-555555555555"
+    error_message = "resource_object_id must resolve from the filtered service_principals data source"
+  }
+}
+
+run "no_app_role_assignment_without_admin_consent" {
+  command = plan
+
+  variables {
+    app_registrations = {
+      description = "App Registration with non-admin-consented API permission"
+      azuread_application = {
+        required_resource_access = [
+          {
+            resource_app_id = "00000003-0000-0000-c000-000000000000"
+            resource_access = [
+              {
+                id                  = "df021288-bdef-4463-88db-98f22de89214"
+                type                = "Role"
+                grant_admin_consent = false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  assert {
+    condition     = length(azuread_app_role_assignment.assignment) == 0
+    error_message = "azuread_app_role_assignment must not be created when grant_admin_consent = false"
+  }
+  assert {
+    condition     = length(data.azuread_service_principal.service_principals) == 0
+    error_message = "service_principals data source must not resolve any SP when no resource_access entry has grant_admin_consent = true"
+  }
+}

@@ -221,8 +221,15 @@ data "azuread_service_principal" "delegated_apps" {
   client_id = data.azuread_application_published_app_ids.well_known.result[each.key]
 }
 
+# Only resolve SPs for resource_app_ids that actually request an admin-consent
+# grant — avoids unnecessary API calls and the broader SP-read permission that
+# would otherwise be required even when no azuread_app_role_assignment is created.
 data "azuread_service_principal" "service_principals" {
-  for_each = toset([for required_resource in try(var.app_registrations.azuread_application.required_resource_access, {}) : required_resource.resource_app_id])
+  for_each = toset([
+    for required_resource in try(var.app_registrations.azuread_application.required_resource_access, {}) :
+    required_resource.resource_app_id
+    if length([for resource_access in required_resource.resource_access : resource_access if try(resource_access.grant_admin_consent, false)]) > 0
+  ])
 
   client_id = each.value
 }

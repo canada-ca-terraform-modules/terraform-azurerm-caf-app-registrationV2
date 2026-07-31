@@ -56,7 +56,12 @@ run "baseline_apply" {
 }
 
 # Step 2: plan the upgraded code against that state — same inputs plus the new
-# additive user_object_id argument. Must not force replacement of any resource.
+# additive user_object_id argument. Asserts that key attributes remain stable
+# across the upgrade. Note: the Terraform 1.x `test` framework's `assert`
+# blocks can only inspect planned attribute *values*, not planned resource
+# *actions* (create/update/replace) — this run proves stable attributes, not
+# a guaranteed no-replace plan. Pair with `terraform plan` against real state
+# via the terraform-module-upgrade-probe workflow for a full replace-action check.
 run "upgrade_plan_no_replacement" {
   command = plan
 
