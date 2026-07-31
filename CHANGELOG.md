@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Bumped `ESLZ/app_registrationV2.tf` module `source` ref from `v1.0.2` to `v1.1.0`.
 - `azuread_service_principal_delegated_permission_grant.test` renamed to `azuread_service_principal_delegated_permission_grant.delegated_permission_grant` via a `moved` block (no state churn for existing deployments) — see `moved.tf`.
 - Outputs `aad_app_object` / `aad_sp_object` marked `sensitive = true` since they expose full resource objects.
+- `preferred_single_sign_on_mode` default changed from `""` to `null` to avoid sending an empty string to the Azure AD API when the attribute is not configured.
+- Fixed `ESLZ/app_registrationV2.tf` module source URL: corrected typo in repository name (`app_registrationV2` → `app-registrationV2`); the underscore would cause a 404 on `terraform init`.
+- Documented module-specific `grant_admin_consent` attribute on `required_resource_access.resource_access` entries in `ESLZ/app_registrationV2.tfvars` — without this flag, `azuread_app_role_assignment` resources are not created even when permissions are declared.
 
 ### Removed
 

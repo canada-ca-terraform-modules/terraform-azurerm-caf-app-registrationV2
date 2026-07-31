@@ -186,7 +186,7 @@ resource "azuread_service_principal" "aad_sp" {
   notes                         = try(var.app_registrations.azuread_service_principal.notes, null)
   notification_email_addresses  = try(var.app_registrations.azuread_service_principal.notification_email_addresses, [])
   owners                        = local.owners_list
-  preferred_single_sign_on_mode = try(var.app_registrations.azuread_service_principal.preferred_single_sign_on_mode, "")
+  preferred_single_sign_on_mode = try(var.app_registrations.azuread_service_principal.preferred_single_sign_on_mode, null)
   tags                          = try(var.app_registrations.azuread_service_principal.tags, null)
   use_existing                  = try(var.app_registrations.azuread_service_principal.use_existing, false)
 
