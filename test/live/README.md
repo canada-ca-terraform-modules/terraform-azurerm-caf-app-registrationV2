@@ -96,3 +96,4 @@ shared local state file path, and confirm the plan in step 2 diffs against
 the resources step 1 actually created (not an empty/fresh-state plan).
 Repeat with two different `pr_number` values and confirm no display_name
 collision.
+
