@@ -16,6 +16,7 @@ terraform {
 
 provider "azuread" {}
 
+# no-op: touches this file so PR B's diff matches live-test.yml's on.pull_request.paths filter
 module "app_registration" {
   # PR code and baseline code are two on-disk checkouts of this same repo,
   # not two resolved git refs - no pinned ?ref, no version toggle here.
