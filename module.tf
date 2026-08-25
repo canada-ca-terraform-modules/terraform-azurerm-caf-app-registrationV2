@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 data "azuread_user" "owners" {
   for_each = toset(try(var.app_registrations.owners, []))
 
@@ -188,7 +186,7 @@ resource "azuread_service_principal" "aad_sp" {
   notes                         = try(var.app_registrations.azuread_service_principal.notes, null)
   notification_email_addresses  = try(var.app_registrations.azuread_service_principal.notification_email_addresses, [])
   owners                        = local.owners_list
-  preferred_single_sign_on_mode = try(var.app_registrations.azuread_service_principal.preferred_single_sign_on_mode, "")
+  preferred_single_sign_on_mode = try(var.app_registrations.azuread_service_principal.preferred_single_sign_on_mode, null)
   tags                          = try(var.app_registrations.azuread_service_principal.tags, null)
   use_existing                  = try(var.app_registrations.azuread_service_principal.use_existing, false)
 
@@ -216,30 +214,38 @@ resource "azuread_service_principal" "aad_sp" {
   }
 }
 
-data "azuread_application_published_app_ids" "well_known" {}  
+data "azuread_application_published_app_ids" "well_known" {}
 
 data "azuread_service_principal" "delegated_apps" {
-  for_each = try(var.app_registrations.azuread_application.delegated_permission, {})
+  for_each  = try(var.app_registrations.azuread_application.delegated_permission, {})
   client_id = data.azuread_application_published_app_ids.well_known.result[each.key]
 }
 
+# Only resolve SPs for resource_app_ids that actually request an admin-consent
+# grant — avoids unnecessary API calls and the broader SP-read permission that
+# would otherwise be required even when no azuread_app_role_assignment is created.
 data "azuread_service_principal" "service_principals" {
-  for_each = toset([for required_resource in try(var.app_registrations.azuread_application.required_resource_access, {}) : required_resource.resource_app_id])
+  for_each = toset([
+    for required_resource in try(var.app_registrations.azuread_application.required_resource_access, {}) :
+    required_resource.resource_app_id
+    if length([for resource_access in required_resource.resource_access : resource_access if try(resource_access.grant_admin_consent, false)]) > 0
+  ])
 
   client_id = each.value
 }
 
 resource "azuread_app_role_assignment" "assignment" {
-  for_each = local.app_perm
-  app_role_id = each.value.id
+  for_each            = local.app_perm
+  app_role_id         = each.value.id
   principal_object_id = azuread_service_principal.aad_sp.object_id
-  resource_object_id = each.value.resource_app_id
-  depends_on = [ azuread_application.aad_app, azuread_service_principal.aad_sp ]
+  resource_object_id  = each.value.resource_app_id
+  depends_on          = [azuread_application.aad_app, azuread_service_principal.aad_sp]
 }
 
-resource "azuread_service_principal_delegated_permission_grant" "test" {
-  for_each = local.delegated_perm
-  service_principal_object_id = azuread_service_principal.aad_sp.object_id
+resource "azuread_service_principal_delegated_permission_grant" "delegated_permission_grant" {
+  for_each                             = local.delegated_perm
+  service_principal_object_id          = azuread_service_principal.aad_sp.object_id
   resource_service_principal_object_id = each.value.resource_sp
-  claim_values = each.value.permission
+  claim_values                         = each.value.permission
+  user_object_id                       = try(each.value.user_object_id, null)
 }

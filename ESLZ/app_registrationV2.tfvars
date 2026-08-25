@@ -127,14 +127,17 @@ app_registrationsV2 = {
       # ]
 
       # (Optional) A collection of required_resource_access blocks as documented below.
-      # NOTE : type="Scope" means Delegated permissions, type="Role" means Application permissions
+      # NOTE: set grant_admin_consent = true on a resource_access entry to also create an
+      # azuread_app_role_assignment for that permission (admin-consent grant). Without it the
+      # permission is declared on the app registration but no consent is granted automatically.
       # required_resource_access = [
       #   {
       #     # (Required)
       #     resource_access = [
       #       {
-      #         id   = "64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0" # (Required) The unique identifier for an app role or OAuth2 permission scope published by the resource application.
-      #         type = "Scope"                                # (Required) Specifies whether the id property references an app role or an OAuth2 permission scope. Possible values are Role or Scope.
+      #         id                  = "64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0" # (Required) The unique identifier for an app role or OAuth2 permission scope published by the resource application.
+      #         type                = "Role"                                  # (Required) Specifies whether the id references an app role ("Role") or an OAuth2 scope ("Scope").
+      #         grant_admin_consent = true                                    # (Module-specific) Set to true to also create an azuread_app_role_assignment granting admin consent for this role.
       #       }
       #     ]
       #     resource_app_id = "00000003-0000-0000-c000-000000000000" # (Required) The unique identifier for the resource that the application requires access to. This should be the Application ID of the target application.
