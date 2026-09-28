@@ -67,6 +67,36 @@ run "default_values" {
   }
 }
 
+run "owners_accept_upns_and_object_ids" {
+  command = plan
+
+  override_data {
+    target = data.azuread_user.owners["owner@example.com"]
+    values = {
+      object_id = "11111111-1111-1111-1111-111111111111"
+    }
+  }
+
+  variables {
+    app_registrations = {
+      description = "App Registration with mixed owner inputs"
+      owners = [
+        "owner@example.com",
+        "22222222-2222-2222-2222-222222222222"
+      ]
+    }
+  }
+
+  assert {
+    condition     = azuread_application.aad_app.owners == toset(["11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"])
+    error_message = "application owners must include looked-up UPN object_ids and pass through explicit object_ids"
+  }
+  assert {
+    condition     = azuread_service_principal.aad_sp.owners == toset(["11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"])
+    error_message = "service principal owners must include looked-up UPN object_ids and pass through explicit object_ids"
+  }
+}
+
 run "app_role_and_feature_tags" {
   command = plan
 
