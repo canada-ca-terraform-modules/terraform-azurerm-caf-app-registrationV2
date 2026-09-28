@@ -1,7 +1,8 @@
 app_registrationsV2 = {
   test = {
     description = "Test App Registration" # (Required) Description of the app registration
-    # (Optional) List of User UPNs that will be the initial owners of the app registration. Only used on 1st deployment of App Reg du to life_cycle
+    # (Optional) List of User UPNs or ObjectIds (UAMIs or service principals) that will be the initial owners of the app registration. 
+    # Only used on 1st deployment of App Reg due to life_cycle
     owners = [
       "SET OWNER HERE"
     ]

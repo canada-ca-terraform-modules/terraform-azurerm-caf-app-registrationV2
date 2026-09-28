@@ -1,12 +1,35 @@
 data "azuread_user" "owners" {
-  for_each = toset(try(var.app_registrations.owners, []))
+  for_each = toset(
+    [
+      for owner in toset(try(var.app_registrations.owners, [])) : 
+      owner 
+      # only lookup things that look like a UPN/e-mail address
+      if length(regexall(local.upn_regex_pattern, owner)) > 0
+    ]
+  )
 
   user_principal_name = each.value
 }
 
 locals {
+  upn_regex_pattern = "^[^@]+@[^@]+\\.[^@]+$"
+
   # owners_list = data.azuread_user.owners[*].object_id
-  owners_list = [for owner in data.azuread_user.owners : owner.object_id]
+  owners_list = toset(
+    concat(
+      # ObjectIds of looked-up Azure AD users by UPN
+      [
+        for owner in data.azuread_user.owners : 
+        owner.object_id
+      ], 
+      # Other entries that are assumed to be object ids
+      [
+        for owner in toset(try(var.app_registrations.owners, [])) : 
+        owner
+        if length(regexall(local.upn_regex_pattern, owner)) == 0
+      ]
+    )
+  )
 }
 
 resource "azuread_application" "aad_app" {
